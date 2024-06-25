@@ -32,7 +32,28 @@ local winFlags = bit32.bor(ImGuiWindowFlags.None)
 local themeFile = string.format('%s/MyUI/MyThemeZ.lua', mq.configDir)
 local configFile = string.format('%s/MyUI/%s/%s_Configs.lua', mq.configDir, script, script)
 local themezDir = mq.luaDir .. '/themez/init.lua'
-
+local PluginLoaded = false
+local TogglePC = true
+local ToggleNPC = true
+local ToggleSelf = true
+local ToggleDist = true
+local ToggleMount = true
+local ToggleAutoSize = true
+local ToggleCorpse = true
+local TogglePets = true
+local ToggleMercs = true
+local ToggleTarget = true
+local ToggleEverything = true
+local AutoSave = true
+local SizeEverything = 6
+local SizePC = 6
+local SizeNPC = 6
+local SizeTarget = 6
+local SizePets = 6
+local SizeMercs = 6
+local SizeMounts = 6
+local SizeCorpse = 6
+local SizeSelf = 6
 -- Default Settings
 defaults = {
 	GrpCmd = '/dgge ',
@@ -42,29 +63,7 @@ defaults = {
 	LoadTheme = 'Default',
 	locked = false,
 	LoadPlugin = true,
-	PluginLoaded = false,
-	TogglePC = true,
-	ToggleNPC = true,
-	ToggleSelf = true,
-	ToggleDist = true,
-	ToggleMount = true,
-	ToggleAutoSize = true,
-	ToggleCorpse = true,
-	TogglePets = true,
-	ToggleMercs = true,
-	ToggleTarget = true,
-	ToggleEverything = true,
-	AutoSave = true,
 	Range = 50,
-	SizeEverything = 6,
-	SizePC = 6,
-	SizeNPC = 6,
-	SizeTarget = 6,
-	SizePets = 6,
-	SizeMercs = 6,
-	SizeMounts = 6,
-	SizeCorpse = 6,
-	SizeSelf = 6,
 }
 
 ---comment Check to see if the file we want to work on exists.
@@ -79,7 +78,7 @@ local function LoadAutoSize()
 	if settings[script].LoadPlugin then
 		if not mq.TLO.Plugin('mq2autosize').IsLoaded() then
 			mq.cmdf("/squelch /plugin autosize noauto")
-			settings[script].PluginLoaded = true
+			PluginLoaded = true
 		end
 	end
 end
@@ -147,20 +146,36 @@ local function loadSettings()
 		newSetting = true
 	end
 
-	if settings[script].PluginLoaded == nil then
-		settings[script].PluginLoaded = mq.TLO.Plugin('mq2autosize').IsLoaded()
-		newSetting = true
-	end
-
-	settings[script].PluginLoaded = mq.TLO.Plugin('mq2autosize').IsLoaded()
-	if not settings[script].PluginLoaded and settings[script].LoadPlugin then
+	PluginLoaded = mq.TLO.Plugin('mq2autosize').IsLoaded()
+	if not PluginLoaded and settings[script].LoadPlugin then
 		LoadAutoSize()
 	end
 
-	if settings[script].AutoSave == nil then
+	if AutoSave == nil then
 	AutoSave = true
 		newSetting = true
 	end
+
+	if settings[script].GrpCmd == nil then
+		settings[script].GrpCmd = '/dgge '
+		newSetting = true
+	end
+
+	if settings[script].RaidCmd == nil then
+		settings[script].RaidCmd = '/dgre '
+		newSetting = true
+	end
+
+	if settings[script].Range == nil then
+		settings[script].Range = 100
+		newSetting = true
+	end
+
+	if settings[script].ZoneCmd == nil then
+		settings[script].ZoneCmd = '/dgze '
+		newSetting = true
+	end
+	
 	-- Load the theme
 	loadTheme()
 
@@ -204,28 +219,31 @@ local function Draw_GUI()
 					showConfigGUI = not showConfigGUI
 				end
 			end
-			local label1 = settings[script].PluginLoaded and "Unload" or "Load"
+			local label1 = PluginLoaded and "Unload" or "Load"
 			if ImGui.Button(label1) then
-				if settings[script].PluginLoaded then
+				if PluginLoaded then
 					mq.cmdf("/squelch /plugin autosize unload")
-					settings[script].PluginLoaded = false
+					PluginLoaded = false
 				else
 					LoadAutoSize()
 				end
 			end
-			if settings[script].PluginLoaded == true then
+			if PluginLoaded == true then
 				ImGui.SameLine()
 				if ImGui.Button("Save to plugin INI") then
 					mq.cmdf("/autosize save")
 				end
 				ImGui.SameLine()
 				local autoSave = false
-			AutoSave, autoSave = ImGui.Checkbox("Auto Save##check", settings[script].AutoSave)
+			AutoSave, autoSave = ImGui.Checkbox("Auto Save##check", AutoSave)
 				if autoSave then
 					mq.cmd("/multiline ; /autosize autosave; /timed 5 /autosize status")
 				end
-
-
+				local pressed1 = false
+				ToggleEverything , pressed1 = ImGui.Checkbox("Zone Wide##check", ToggleEverything)
+				if pressed1 then
+					mq.cmd("/multiline ;  /autosize; /timed 5, /autosize status")
+				end
 				if ImGui.BeginChild("##SettingsChild", 0.0, 0.0) then
 					if ImGui.BeginTable("##TableSettings", 3, bit32.bor(ImGuiTableFlags.Resizable), -1, -1) then
 						ImGui.TableSetupColumn("##Column1", ImGuiTableColumnFlags.WidthAlwaysAutoResize, -1)
@@ -233,19 +251,20 @@ local function Draw_GUI()
 						ImGui.TableSetupColumn("##Column3", ImGuiTableColumnFlags.WidthAlwaysAutoResize, -1)
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
-						local pressed1 = false
-					ToggleEverything , pressed1 = ImGui.Checkbox("Everything##check", settings[script].ToggleEverything)
-						if pressed1 then
-							mq.cmd("/multiline ;  /autosize; /timed 5, /autosize status")
+						local pressedX = false
+						ToggleDist , pressedX = ImGui.Checkbox("Range Based Toggle##check", ToggleDist)
+						if pressedX then
+							mq.cmd("/multiline ; /autosize dist; /timed 5, /autosize status")
 						end
+
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].Range = ImGui.InputInt("Range Everything##input", settings[script].Range, 1, 10)
+						settings[script].Range = ImGui.InputInt("Range Distance##input", settings[script].Range, 1, 10)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##Range") then
 
 							mq.cmdf("/timed 5, /autosize range %d", settings[script].Range)
-							
+							printf("/timed 5, /autosize range %d", settings[script].Range)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##Range") then
@@ -275,28 +294,28 @@ local function Draw_GUI()
 
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizePC = ImGui.InputInt("PC##input", settings[script].SizePC, 1, 250)
+					SizePC = ImGui.InputInt("PC##input", SizePC, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##PCSize") then
 
-							mq.cmdf("/autosize sizepc %d", settings[script].SizePC)
+							mq.cmdf("/autosize sizepc %d", SizePC)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##PC") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepc %d", settings[script].GrpCmd,settings[script].SizePC)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepc %d", settings[script].GrpCmd,SizePC)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##PC") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepc %d", settings[script].ZoneCmd,settings[script].SizePC)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepc %d", settings[script].ZoneCmd,SizePC)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##PC") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepc %d", settings[script].RaidCmd,settings[script].SizePC)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepc %d", settings[script].RaidCmd,SizePC)
 							
 						end
 
@@ -309,198 +328,198 @@ local function Draw_GUI()
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizeNPC = ImGui.InputInt("NPC##input", settings[script].SizeNPC, 1, 250)
+					SizeNPC = ImGui.InputInt("NPC##input", SizeNPC, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##NPCSize") then
 
-							mq.cmdf("/autosize sizenpc %d", settings[script].SizeNPC)
+							mq.cmdf("/autosize sizenpc %d", SizeNPC)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##NPC") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizenpc %d", settings[script].GrpCmd,settings[script].SizeNPC)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizenpc %d", settings[script].GrpCmd,SizeNPC)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##NPC") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizenpc %d", settings[script].ZoneCmd,settings[script].SizeNPC)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizenpc %d", settings[script].ZoneCmd,SizeNPC)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##NPC") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizenpc %d", settings[script].RaidCmd,settings[script].SizeNPC)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizenpc %d", settings[script].RaidCmd,SizeNPC)
 							
 						end
 
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed4 = false
-					ToggleSelf, pressed4 = ImGui.Checkbox("Self##check", settings[script].ToggleSelf)
+					ToggleSelf, pressed4 = ImGui.Checkbox("Self##check", ToggleSelf)
 						if pressed4 then
 							mq.cmd("/multiline ;  /autosize self; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizeSelf = ImGui.InputInt("Self##input", settings[script].SizeSelf, 1, 250)
+					SizeSelf = ImGui.InputInt("Self##input", SizeSelf, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##SelfSize") then
 
-							mq.cmdf("/autosize sizeself %d", settings[script].SizeSelf)
+							mq.cmdf("/autosize sizeself %d", SizeSelf)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##Self") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizeself %d", settings[script].GrpCmd,settings[script].SizeSelf)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizeself %d", settings[script].GrpCmd,SizeSelf)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##Self") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizeself %d", settings[script].ZoneCmd,settings[script].SizeSelf)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizeself %d", settings[script].ZoneCmd,SizeSelf)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##Self") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizeself %d", settings[script].RaidCmd,settings[script].SizeSelf)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizeself %d", settings[script].RaidCmd,SizeSelf)
 							
 						end
 
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed5 = false
-					ToggleMount, pressed5 = ImGui.Checkbox("Mounts##check", settings[script].ToggleMount)
+					ToggleMount, pressed5 = ImGui.Checkbox("Mounts##check", ToggleMount)
 						if pressed5 then
 							mq.cmd("/multiline ;  /autosize mounts; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizeMounts = ImGui.InputInt("Mounts##input", settings[script].SizeMounts, 1, 250)
+					SizeMounts = ImGui.InputInt("Mounts##input", SizeMounts, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##MountSize") then
 
-							mq.cmdf("/autosize sizemounts %d", settings[script].SizeMounts)
+							mq.cmdf("/autosize sizemounts %d", SizeMounts)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##Mounts") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemounts %d", settings[script].GrpCmd,settings[script].SizeMounts)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemounts %d", settings[script].GrpCmd,SizeMounts)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##Mounts") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemounts %d", settings[script].ZoneCmd,settings[script].SizeMounts)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemounts %d", settings[script].ZoneCmd,SizeMounts)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##Mounts") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemounts %d", settings[script].RaidCmd,settings[script].SizeMounts)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemounts %d", settings[script].RaidCmd,SizeMounts)
 							
 						end
 
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed6 = false
-					ToggleCorpse, pressed6 = ImGui.Checkbox("Corpse##check", settings[script].ToggleCorpse)
+					ToggleCorpse, pressed6 = ImGui.Checkbox("Corpse##check", ToggleCorpse)
 						if pressed6 then
 							mq.cmd("/multiline ;  /autosize corpse; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizeCorpse = ImGui.InputInt("Corpse##input", settings[script].SizeCorpse, 1, 250)
+					SizeCorpse = ImGui.InputInt("Corpse##input", SizeCorpse, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##CorpseSize") then
 
-							mq.cmdf("/autosize sizecorpse %d", settings[script].SizeCorpse)
+							mq.cmdf("/autosize sizecorpse %d", SizeCorpse)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##Corpse") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizecorpse %d", settings[script].GrpCmd,settings[script].SizeCorpse)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizecorpse %d", settings[script].GrpCmd,SizeCorpse)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##Corpse") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizecorpse %d", settings[script].ZoneCmd,settings[script].SizeCorpse)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizecorpse %d", settings[script].ZoneCmd,SizeCorpse)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##Corpse") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizecorpse %d", settings[script].RaidCmd,settings[script].SizeCorpse)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizecorpse %d", settings[script].RaidCmd,SizeCorpse)
 							
 						end
 
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed7 = false
-					TogglePets, pressed7 = ImGui.Checkbox("Pets##check", settings[script].TogglePets)
+					TogglePets, pressed7 = ImGui.Checkbox("Pets##check", TogglePets)
 						if pressed7 then
 							mq.cmd("/multiline ;  /autosize pets; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizePets = ImGui.InputInt("Pets##input", settings[script].SizePets, 1, 250)
+					SizePets = ImGui.InputInt("Pets##input", SizePets, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##PetsSize") then
 
-							mq.cmdf("/autosize sizepets %d", settings[script].SizePets)
+							mq.cmdf("/autosize sizepets %d", SizePets)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##Pets") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepets %d", settings[script].GrpCmd,settings[script].SizePets)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepets %d", settings[script].GrpCmd,SizePets)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##Pets") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepets %d", settings[script].ZoneCmd,settings[script].SizePets)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepets %d", settings[script].ZoneCmd,SizePets)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##Pets") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepets %d", settings[script].RaidCmd,settings[script].SizePets)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizepets %d", settings[script].RaidCmd,SizePets)
 							
 						end
 
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed8 = false
-					ToggleMercs, pressed8 = ImGui.Checkbox("Mercs##check", settings[script].ToggleMercs)
+					ToggleMercs, pressed8 = ImGui.Checkbox("Mercs##check", ToggleMercs)
 						if pressed8 then
 							mq.cmd("/multiline ;  /autosize mercs; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizeMercs = ImGui.InputInt("Mercs##input", settings[script].SizeMercs, 1, 250)
+					SizeMercs = ImGui.InputInt("Mercs##input", SizeMercs, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##MercsSize") then
 
-							mq.cmdf("/autosize sizemercs %d", settings[script].SizeMercs)
+							mq.cmdf("/autosize sizemercs %d", SizeMercs)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##Mercs") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemercs %d", settings[script].GrpCmd,settings[script].SizeMercs)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemercs %d", settings[script].GrpCmd,SizeMercs)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##Mercs") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemercs %d", settings[script].ZoneCmd,settings[script].SizeMercs)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemercs %d", settings[script].ZoneCmd,SizeMercs)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##Mercs") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemercs %d", settings[script].RaidCmd,settings[script].SizeMercs)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizemercs %d", settings[script].RaidCmd,SizeMercs)
 							
 						end
 
@@ -509,28 +528,28 @@ local function Draw_GUI()
 						
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-					SizeTarget = ImGui.InputInt("Target##input", settings[script].SizeTarget, 1, 250)
+					SizeTarget = ImGui.InputInt("Target##input", SizeTarget, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##TargetSize") then
 
-							mq.cmdf("/multiline ;  /autosize sizetarget %d; /timed 5, /autosize status; /timed 10, /autosize target", settings[script].SizeTarget)
+							mq.cmdf("/multiline ;  /autosize sizetarget %d; /timed 5, /autosize status; /timed 10, /autosize target", SizeTarget)
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Grp##Target") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizetarget %d; /timed 5, /autosize target;", settings[script].GrpCmd,settings[script].SizeTarget)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizetarget %d; /timed 5, /autosize target;", settings[script].GrpCmd,SizeTarget)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Zone##Target") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizetarget %d; /timed 5, /autosize target;", settings[script].ZoneCmd,settings[script].SizeTarget)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizetarget %d; /timed 5, /autosize target;", settings[script].ZoneCmd,SizeTarget)
 							
 						end
 						ImGui.SameLine()
 						if ImGui.Button("Raid##Target") then
 
-							mq.cmdf("%s/multiline ; /timed 5, /autosize sizetarget %d; /timed 5, /autosize target;", settings[script].RaidCmd,settings[script].SizeTarget)
+							mq.cmdf("%s/multiline ; /timed 5, /autosize sizetarget %d; /timed 5, /autosize target;", settings[script].RaidCmd,SizeTarget)
 							
 						end
 
@@ -644,28 +663,29 @@ end
 local function EventToggles(line, pc, npc, pets, mercs, mounts, corpses, myself, everything)
 	TogglePC = pc == 'on' and true or false
 	ToggleNPC = npc == 'on' and true or false
-TogglePets = pets == 'on' and true or false
-ToggleMercs = mercs == 'on' and true or false
-ToggleMount = mounts == 'on' and true or false
-ToggleCorpse = corpses == 'on' and true or false
-ToggleSelf = myself == 'on' and true or false
+	TogglePets = pets == 'on' and true or false
+	ToggleMercs = mercs == 'on' and true or false
+	ToggleMount = mounts == 'on' and true or false
+	ToggleCorpse = corpses == 'on' and true or false
+	ToggleSelf = myself == 'on' and true or false
 	
 end
 
 local function EventSizes(line, pc, npc, pets, mercs, mounts, corpses, target, myself, everything)
-SizePC = pc
-SizeNPC = npc
-SizePets = pets
-SizeMercs = mercs
-SizeMounts = mounts
-SizeCorpse = corpses
-SizeTarget = target
-SizeSelf = myself
-SizeEverything = everything
+	SizePC = pc
+	SizeNPC = npc
+	SizePets = pets
+	SizeMercs = mercs
+	SizeMounts = mounts
+	SizeCorpse = corpses
+	SizeTarget = target
+	SizeSelf = myself
+	SizeEverything = everything
 end
 
 local function EventStatus(line, method, autoSave)
 ToggleEverything = method == 'Zonewide' and true or false
+ToggleDist = method == 'Range' and true or false
 AutoSave = autoSave == 'AUTOSAVING' and true or false
 	mq.pickle(configFile, settings)
 end
