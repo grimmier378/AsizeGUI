@@ -158,7 +158,7 @@ local function loadSettings()
 	end
 
 	if settings[script].AutoSave == nil then
-		settings[script].AutoSave = true
+	AutoSave = true
 		newSetting = true
 	end
 	-- Load the theme
@@ -214,17 +214,13 @@ local function Draw_GUI()
 				end
 			end
 			if settings[script].PluginLoaded == true then
-			-- Save Settings
-				if ImGui.Button("Save") then
-					mq.pickle(configFile, settings)
-				end
 				ImGui.SameLine()
 				if ImGui.Button("Save to plugin INI") then
 					mq.cmdf("/autosize save")
 				end
 				ImGui.SameLine()
 				local autoSave = false
-				settings[script].AutoSave, autoSave = ImGui.Checkbox("Auto Save##check", settings[script].AutoSave)
+			AutoSave, autoSave = ImGui.Checkbox("Auto Save##check", settings[script].AutoSave)
 				if autoSave then
 					mq.cmd("/multiline ; /autosize autosave; /timed 5 /autosize status")
 				end
@@ -238,7 +234,7 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed1 = false
-						settings[script].ToggleEverything , pressed1 = ImGui.Checkbox("Everything##check", settings[script].ToggleEverything)
+					ToggleEverything , pressed1 = ImGui.Checkbox("Everything##check", settings[script].ToggleEverything)
 						if pressed1 then
 							mq.cmd("/multiline ;  /autosize; /timed 5, /autosize status")
 						end
@@ -272,14 +268,14 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed2 = false
-						settings[script].TogglePC, pressed2 = ImGui.Checkbox("PC##check", settings[script].TogglePC)
+						TogglePC, pressed2 = ImGui.Checkbox("PC##check", TogglePC)
 						if pressed2 then
 							mq.cmd("/multiline ;  /autosize pc; /timed 5, /autosize status")
 						end
 
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizePC = ImGui.InputInt("PC##input", settings[script].SizePC, 1, 250)
+					SizePC = ImGui.InputInt("PC##input", settings[script].SizePC, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##PCSize") then
 
@@ -307,13 +303,13 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed3 = false
-						settings[script].ToggleNPC, pressed3 = ImGui.Checkbox("NPC##check", settings[script].ToggleNPC)
+						ToggleNPC, pressed3 = ImGui.Checkbox("NPC##check", ToggleNPC)
 						if pressed3 then
 							mq.cmd("/multiline ;  /autosize npc; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizeNPC = ImGui.InputInt("NPC##input", settings[script].SizeNPC, 1, 250)
+					SizeNPC = ImGui.InputInt("NPC##input", settings[script].SizeNPC, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##NPCSize") then
 
@@ -341,13 +337,13 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed4 = false
-						settings[script].ToggleSelf, pressed4 = ImGui.Checkbox("Self##check", settings[script].ToggleSelf)
+					ToggleSelf, pressed4 = ImGui.Checkbox("Self##check", settings[script].ToggleSelf)
 						if pressed4 then
 							mq.cmd("/multiline ;  /autosize self; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizeSelf = ImGui.InputInt("Self##input", settings[script].SizeSelf, 1, 250)
+					SizeSelf = ImGui.InputInt("Self##input", settings[script].SizeSelf, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##SelfSize") then
 
@@ -375,13 +371,13 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed5 = false
-						settings[script].ToggleMount, pressed5 = ImGui.Checkbox("Mounts##check", settings[script].ToggleMount)
+					ToggleMount, pressed5 = ImGui.Checkbox("Mounts##check", settings[script].ToggleMount)
 						if pressed5 then
 							mq.cmd("/multiline ;  /autosize mounts; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizeMounts = ImGui.InputInt("Mounts##input", settings[script].SizeMounts, 1, 250)
+					SizeMounts = ImGui.InputInt("Mounts##input", settings[script].SizeMounts, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##MountSize") then
 
@@ -409,13 +405,13 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed6 = false
-						settings[script].ToggleCorpse, pressed6 = ImGui.Checkbox("Corpse##check", settings[script].ToggleCorpse)
+					ToggleCorpse, pressed6 = ImGui.Checkbox("Corpse##check", settings[script].ToggleCorpse)
 						if pressed6 then
 							mq.cmd("/multiline ;  /autosize corpse; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizeCorpse = ImGui.InputInt("Corpse##input", settings[script].SizeCorpse, 1, 250)
+					SizeCorpse = ImGui.InputInt("Corpse##input", settings[script].SizeCorpse, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##CorpseSize") then
 
@@ -443,13 +439,13 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed7 = false
-						settings[script].TogglePets, pressed7 = ImGui.Checkbox("Pets##check", settings[script].TogglePets)
+					TogglePets, pressed7 = ImGui.Checkbox("Pets##check", settings[script].TogglePets)
 						if pressed7 then
 							mq.cmd("/multiline ;  /autosize pets; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizePets = ImGui.InputInt("Pets##input", settings[script].SizePets, 1, 250)
+					SizePets = ImGui.InputInt("Pets##input", settings[script].SizePets, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##PetsSize") then
 
@@ -477,13 +473,13 @@ local function Draw_GUI()
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
 						local pressed8 = false
-						settings[script].ToggleMercs, pressed8 = ImGui.Checkbox("Mercs##check", settings[script].ToggleMercs)
+					ToggleMercs, pressed8 = ImGui.Checkbox("Mercs##check", settings[script].ToggleMercs)
 						if pressed8 then
 							mq.cmd("/multiline ;  /autosize mercs; /timed 5, /autosize status")
 						end
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizeMercs = ImGui.InputInt("Mercs##input", settings[script].SizeMercs, 1, 250)
+					SizeMercs = ImGui.InputInt("Mercs##input", settings[script].SizeMercs, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##MercsSize") then
 
@@ -510,14 +506,10 @@ local function Draw_GUI()
 
 						ImGui.TableNextRow()
 						ImGui.TableNextColumn()
-						local pressed9 = false
-						-- if ImGui.Button('Resize Target') then
-						-- 	mq.cmd("/multiline ;  /autosize target; /timed 5, /autosize status")
-						-- end
 						
 						ImGui.TableNextColumn()
 						ImGui.SetNextItemWidth(100)
-						settings[script].SizeTarget = ImGui.InputInt("Target##input", settings[script].SizeTarget, 1, 250)
+					SizeTarget = ImGui.InputInt("Target##input", settings[script].SizeTarget, 1, 250)
 						ImGui.TableNextColumn()
 						if ImGui.Button("Set##TargetSize") then
 
@@ -551,18 +543,22 @@ local function Draw_GUI()
 			end
 			-- Reset Font Scale
 			ImGui.SetWindowFontScale(1)
-
-		end
-
 		-- Unload Theme
 		LoadTheme.EndTheme(ColorCount, StyleCount)
 		ImGui.End()
+		else
+		-- Unload Theme
+		LoadTheme.EndTheme(ColorCount, StyleCount)
+		ImGui.End()
+		end
+
+
 	end
 
 	if showConfigGUI then
 			local winName = string.format('%s Config##Config_%s',script, meName)
 			local ColCntConf, StyCntConf = LoadTheme.StartTheme(theme.Theme[themeID])
-			local openConfig, showConfig = ImGui.Begin(winName,true,bit32.bor(ImGuiWindowFlags.NoCollapse, ImGuiWindowFlags.AlwaysAutoResize))
+			local openConfig, showConfig = ImGui.Begin(winName,true,bit32.bor(ImGuiWindowFlags.NoCollapse, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoDocking))
 			if not openConfig then
 				showConfigGUI = false
 			end
@@ -634,41 +630,43 @@ local function Draw_GUI()
 					mq.pickle(configFile, settings)
 					showConfigGUI = false
 				end
+				LoadTheme.EndTheme(ColCntConf, StyCntConf)
+				ImGui.End()
+			else
+				LoadTheme.EndTheme(ColCntConf, StyCntConf)
+				ImGui.End()
 			end
-			LoadTheme.EndTheme(ColCntConf, StyCntConf)
-			ImGui.End()
+
 	end
 
 end
 
 local function EventToggles(line, pc, npc, pets, mercs, mounts, corpses, myself, everything)
-	settings[script].TogglePC = pc == 'on' and true or false
-	settings[script].ToggleNPC = npc == 'on' and true or false
-	settings[script].TogglePets = pets == 'on' and true or false
-	settings[script].ToggleMercs = mercs == 'on' and true or false
-	settings[script].ToggleMount = mounts == 'on' and true or false
-	settings[script].ToggleCorpse = corpses == 'on' and true or false
-	settings[script].ToggleSelf = myself == 'on' and true or false
+	TogglePC = pc == 'on' and true or false
+	ToggleNPC = npc == 'on' and true or false
+TogglePets = pets == 'on' and true or false
+ToggleMercs = mercs == 'on' and true or false
+ToggleMount = mounts == 'on' and true or false
+ToggleCorpse = corpses == 'on' and true or false
+ToggleSelf = myself == 'on' and true or false
 	
-	mq.pickle(configFile, settings)
 end
 
 local function EventSizes(line, pc, npc, pets, mercs, mounts, corpses, target, myself, everything)
-	settings[script].SizePC = pc
-	settings[script].SizeNPC = npc
-	settings[script].SizePets = pets
-	settings[script].SizeMercs = mercs
-	settings[script].SizeMounts = mounts
-	settings[script].SizeCorpse = corpses
-	settings[script].SizeTarget = target
-	settings[script].SizeSelf = myself
-	settings[script].SizeEverything = everything
-	mq.pickle(configFile, settings)
+SizePC = pc
+SizeNPC = npc
+SizePets = pets
+SizeMercs = mercs
+SizeMounts = mounts
+SizeCorpse = corpses
+SizeTarget = target
+SizeSelf = myself
+SizeEverything = everything
 end
 
 local function EventStatus(line, method, autoSave)
-	settings[script].ToggleEverything = method == 'Zonewide' and true or false
-	settings[script].AutoSave = autoSave == 'AUTOSAVING' and true or false
+ToggleEverything = method == 'Zonewide' and true or false
+AutoSave = autoSave == 'AUTOSAVING' and true or false
 	mq.pickle(configFile, settings)
 end
 
